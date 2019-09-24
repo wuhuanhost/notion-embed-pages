@@ -25,7 +25,7 @@
             }
             #app .top {
                 height: 100px;
-                padding: 0 20px;
+                padding: 0 16px;
                 font-weight: 600;
                 /* background: red; */
             }
@@ -42,7 +42,7 @@
                 font-size: 15px;
                 color: #6e6e6e;
                 font-weight: 200;
-                font-size: 14px;
+                font-size: 16px;
             }
             #app .middle {
                 height: 140px;
@@ -58,7 +58,7 @@
                 border: 2px solid #6e6e6e;
                 line-height: 100px;
                 text-align: center;
-                font-size: 49px;
+                font-size: 60px;
                 border-radius: 2px;
                 font-family: "Rationale", sans-serif;
             }
@@ -164,7 +164,7 @@
                     if (todayCount <= 0) {
                         pomodoroStr = "今日完成0个番茄，加油！";
                     } else {
-                        $("#app .top .today-count").text("(" + todayCount + ")");
+                        $("#app .top .today-count").text("(" + todayCount + "个)");
                     }
                     $("#app .top .icon").text(pomodoroStr);
                 }
