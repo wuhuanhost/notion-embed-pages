@@ -18,7 +18,7 @@
             #app {
                 width: 300px;
                 height: 300px;
-                border: 1px solid #eee;
+                /* border: 1px solid #eee; */
                 display: flex;
                 flex-direction: column;
                 margin: 0px auto;
@@ -100,7 +100,7 @@
         <script>
             $(document).ready(function() {
                 var timer = null;
-                var minute = 1;
+                var minute = 25;
                 $("#app #clock").text(minute + ":" + "00");
                 drawTodayPomodoro();
                 //倒计时方法
