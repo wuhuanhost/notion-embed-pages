@@ -96,26 +96,42 @@
                 <div class="button" id="start-reset-btn">开 始</div>
             </div>
         </div>
-        <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
         <script>
             $(document).ready(function() {
                 var timer = null;
-                var minute = 25;
-                $("#app #clock").text(minute + ":" + "00");
+                var minute = 0.2; //番茄钟的默认时长25分钟
+                var second = minute * 60; //番茄钟的秒数
+                if (parseInt(localStorage.getItem("data-memory-second")) > 0 && parseInt(localStorage.getItem("data-memory-second")) !== second) {
+                    second = parseInt(localStorage.getItem("data-memory-second"));
+                    //如果一个番茄在执行的过程中，用户刷新了浏览器，那么番茄将继续执行
+                    startResetBtnEvent($("#start-reset-btn"));
+                }
+
+                var date = new Date();
+                var today_count_key = date.getFullYear() + "-" + (parseInt(date.getMonth()) + 1) + "-" + date.getDate();
+                $("#app #clock").text(secondToMinuteSecond(second));
                 drawTodayPomodoro();
+
+                //开始、重置按钮事件绑定
+                $("#start-reset-btn").click(function() {
+                    startResetBtnEvent(this);
+                });
+
                 //倒计时方法
                 function timerFun(action, cb) {
-                    var second = minute * 60;
                     if (timer === null) {
                         timer = setInterval(function() {
                             second = second - 1;
-                            var _minute = parseInt(second / 60);
-                            var _second = second % 60;
+                            // var _minute = parseInt(second / 60);
+                            // var _second = second % 60;
                             if (second <= 0) {
+                                localStorage.setItem("data-memory-second", 0);
                                 cb("done");
                             } else {
-                                console.log(_minute);
-                                cb((_minute >= 10 ? _minute : "0" + _minute) + ":" + (_second >= 10 ? _second : "0" + _second));
+                                // console.log(_minute);
+                                localStorage.setItem("data-memory-second", second); //缓存当前番茄钟的秒数，当刷新的时候就可以记录上一次未完成番茄的时间
+                                cb(secondToMinuteSecond(second));
                             }
                         }, 1000);
                     }
@@ -126,37 +142,43 @@
                     }
                 }
 
-                //开始、重置按钮事件绑定
-                $("#start-reset-btn").click(function() {
-                    var btnText = $(this).text();
-                    var _this = this;
+                //开始和重置按钮事件
+                function startResetBtnEvent(_this) {
+                    second = minute * 60; //番茄钟的秒数
+                    if (parseInt(localStorage.getItem("data-memory-second")) > 0 && parseInt(localStorage.getItem("data-memory-second")) !== second) {
+                        second = parseInt(localStorage.getItem("data-memory-second"));
+                    }
+                    var btnText = $(_this).text();
+                    // var _this = this;
                     if (btnText === "开 始") {
-                        $(this).text("重 置");
+                        $(_this).text("重 置");
                         timerFun("", function(time) {
                             if (time === "done") {
                                 clearInterval(timer);
                                 timer = null;
                                 $(_this).text("开 始");
                                 time = minute + ":" + "00";
-                                var todayCount = parseInt(localStorage.getItem("today-count") || 0);
-                                todayCount++;
-                                localStorage.setItem("today-count", todayCount);
+                                countObject(today_count_key);
                                 drawTodayPomodoro();
                                 alert("恭喜你！你已经完成了一个番茄钟了，休息一下吧！");
                             }
                             $("#app #clock").text(time);
                         });
                     } else {
-                        $(this).text("开 始");
+                        $(_this).text("开 始");
                         timerFun("clear", function(time) {
                             $("#app #clock").text(time);
                         });
                     }
-                });
+                }
 
                 //渲染今日完成番茄数量
                 function drawTodayPomodoro() {
-                    var todayCount = parseInt(localStorage.getItem("today-count") || 0);
+                    var todayCount = 0;
+                    var memoryDataCount = localStorage.getItem("data-count");
+                    if (memoryDataCount) {
+                        todayCount = parseInt(JSON.parse(memoryDataCount)[today_count_key] || 0);
+                    }
                     var pomodoroStr = "";
                     for (var i = 0; i < todayCount; i++) {
                         pomodoroStr += "🍅";
@@ -167,6 +189,24 @@
                         $("#app .top .today-count").text("(" + todayCount + "个)");
                     }
                     $("#app .top .icon").text(pomodoroStr);
+                }
+
+                //统计对象
+                function countObject(key) {
+                    var obj = localStorage.getItem("data-count") ? JSON.parse(localStorage.getItem("data-count")) : {};
+                    if (!obj[key]) {
+                        obj[key] = 1;
+                    } else {
+                        obj[key] = parseInt(obj[key] || 0) + 1;
+                    }
+                    localStorage.setItem("data-count", JSON.stringify(obj));
+                }
+
+                //秒转分钟:秒的形式
+                function secondToMinuteSecond(second) {
+                    var _minute = parseInt(second / 60);
+                    var _second = second % 60;
+                    return (_minute >= 10 ? _minute : "0" + _minute) + ":" + (_second >= 10 ? _second : "0" + _second);
                 }
             });
         </script>
