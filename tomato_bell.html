@@ -100,7 +100,7 @@
         <script>
             $(document).ready(function() {
                 var timer = null;
-                var minute = 0.2; //番茄钟的默认时长25分钟
+                var minute = 25; //番茄钟的默认时长25分钟
                 var second = minute * 60; //番茄钟的秒数
                 if (parseInt(localStorage.getItem("data-memory-second")) > 0 && parseInt(localStorage.getItem("data-memory-second")) !== second) {
                     second = parseInt(localStorage.getItem("data-memory-second"));
