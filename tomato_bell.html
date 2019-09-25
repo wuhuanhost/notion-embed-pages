@@ -67,8 +67,10 @@
                 flex: 1;
 
                 /* background: blue; */
+                text-align: center;
             }
             #app .button {
+                display: inline-block;
                 width: 90px;
                 height: 30px;
                 background: #3e3e3e;
@@ -76,7 +78,7 @@
                 color: #eee;
                 text-align: center;
                 line-height: 30px;
-                margin: 10px auto;
+                margin: 10px 10px;
                 cursor: pointer;
             }
         </style>
@@ -93,7 +95,8 @@
                 </div>
             </div>
             <div class="bottom">
-                <div class="button" id="start-reset-btn">开 始</div>
+                <div class="button" id="start-stop-btn">开 始</div>
+                <div class="button" id="reset-btn">重 置</div>
             </div>
         </div>
         <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
@@ -105,7 +108,9 @@
                 if (parseInt(localStorage.getItem("data-memory-second")) > 0 && parseInt(localStorage.getItem("data-memory-second")) !== second) {
                     second = parseInt(localStorage.getItem("data-memory-second"));
                     //如果一个番茄在执行的过程中，用户刷新了浏览器，那么番茄将继续执行
-                    startResetBtnEvent($("#start-reset-btn"));
+                    if (localStorage.getItem("data-stop-flag") === "false") {
+                        startResetBtnEvent($("#start-stop-btn"));
+                    }
                 }
 
                 var date = new Date();
@@ -113,9 +118,18 @@
                 $("#app #clock").text(secondToMinuteSecond(second));
                 drawTodayPomodoro();
 
-                //开始、重置按钮事件绑定
-                $("#start-reset-btn").click(function() {
+                //开始、暂停按钮事件绑定
+                $("#start-stop-btn").click(function() {
                     startResetBtnEvent(this);
+                });
+
+                //重置按钮
+                $("#reset-btn").click(function() {
+                    timerFun("clear", function(time) {
+                        $("#app #clock").text(time);
+                        localStorage.setItem("data-memory-second", minute * 60);
+                        $("#start-stop-btn").text("开 始");
+                    });
                 });
 
                 //倒计时方法
@@ -139,6 +153,12 @@
                         clearInterval(timer);
                         timer = null;
                         cb(minute + ":" + "00");
+                    } else if (action === "stop") {
+                        clearInterval(timer);
+                        timer = null;
+                        localStorage.setItem("data-stop-flag", "true");
+                    } else {
+                        localStorage.setItem("data-stop-flag", "false");
                     }
                 }
 
@@ -151,7 +171,7 @@
                     var btnText = $(_this).text();
                     // var _this = this;
                     if (btnText === "开 始") {
-                        $(_this).text("重 置");
+                        $(_this).text("暂 停");
                         timerFun("", function(time) {
                             if (time === "done") {
                                 clearInterval(timer);
@@ -166,7 +186,7 @@
                         });
                     } else {
                         $(_this).text("开 始");
-                        timerFun("clear", function(time) {
+                        timerFun("stop", function(time) {
                             $("#app #clock").text(time);
                         });
                     }
